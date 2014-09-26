@@ -7,6 +7,33 @@ from fabpress import utils
 import os, sys, json
 
 
+
+def strtobool(v):
+	try:
+		v = v.lower()
+	except: pass
+
+	if v in ['y', 'yes', True, 1, '1']:
+		return True
+	return False
+
+class Argument(object):
+
+	parser = None
+	checker = None
+	helper = ""
+	name = ""
+	required = True
+
+	def __init__(self, name, required=True, helper=None, parser=None, checker=None):
+
+		self.required = required
+		self.helper = helper
+		self.parser = parser
+		self.checker = checker
+
+
+
 class ArgumentError(Exception):
 	pass
 
@@ -42,16 +69,19 @@ class AbstractBaseTask(object):
 		return required_args + optional_args
 
 	def get_description(self):
-		return """\nTask description:\n\n\t {0}\n""".format(self.__class__.__doc__)
+		return """Task description:\n\n\t{0}\n""".format(self.__class__.__doc__)
+
+	def get_task_id(self):
+		module = self.__module__.split('.')[-1]
+		return "{0}.{1}".format(module, self.name)
 
 	def get_usage(self):
 
 		description = self.get_description()
-		module = self.__module__.split('.')[-1]
 
 		args = ""
 
-		for arg_name, required, value in self.get_expected_args():
+		for arg_name, required, value, parser, checker in self.get_expected_args():
 			arg = "{0}=<{1}>".format(arg_name, value)
 			if not required:
 				arg = "[" + arg + "]"
@@ -60,12 +90,12 @@ class AbstractBaseTask(object):
 		# remove coma
 		args = args[:-1]
 
-		command = "\n" + description + "\n\nTask usage: \n\n\tfp.{0}.{1}:{2}".format(module, self.name, args)
+		command = "\n" + description + "\nTask usage: \n\n\tfab fp.{0}:{1}\n".format(self.get_task_id(), args)
 
 		return command
 
-	def log(self, message, color=None, bold=False, prefix=True):
-		if not self.silent:
+	def log(self, message, color=None, bold=False, prefix=True, force=False):
+		if force or not self.silent:
 			
 			if color is not None:
 				print(getattr(colors, color)(message, bold=bold))
@@ -85,7 +115,7 @@ class AbstractBaseTask(object):
 			self.log(message, "yellow", bold, prefix)
 
 	def error(self, message, bold=False, prefix=False):
-		self.log(message, "red", bold, prefix=prefix)
+		self.log(message, "red", bold, prefix=prefix, force=True)
 
 
 	def pre_run(self):
@@ -95,8 +125,8 @@ class AbstractBaseTask(object):
 			if message: 
 				self.info(message.capitalize() + "...")
 
+	
 	def check_args(self):
-		"""Use this function to check that passed parameters are okay"""
 		pass
 
 	def setup(self, *args, **kwargs):
@@ -109,7 +139,8 @@ class AbstractBaseTask(object):
 		try:		
 			self.check_args()
 		except ArgumentError, e:
-			self.error(str(e))
+			self.error("\nThe task was called with incorrectly: {0}. Please refer to task usage:".format(str(e)))
+			self.log(self.get_usage())
 			sys.exit()
 
 		if not self.subtask:
@@ -127,29 +158,38 @@ class AbstractBaseTask(object):
 		
 		self.pre_run()
 		with hide(*self.hide), show(*self.show):
-			try:
-				r = self.operation(*self.args, **self.kwargs)
-			except TypeError, e:
-				# arguments not okay
-				if "got an unexpected keyword argument" in str(e):
-					wrong_arg = str(e).split("got an unexpected keyword argument")[1].replace("'", '').strip()
-					self.error(str(e))
-					message = """This means you called the task with unexpected arguments."""
-					self.log(message)
-					self.log(self.get_usage())
-					sys.exit()
-				raise
-
+			r = self.operation(*self.args, **self.kwargs)
+			
+		self.post_run()
 		return r		
+
+	def post_run(self):
+
+		with show('everything'):
+			self.trigger_hooks()
+
+	def trigger_hooks(self):
+
+		task = self.get_task_id()
+		hooks = utils.setting("hooks")
+		hooks_to_trigger = [hook for key, hook in hooks.items() if key == task]
+		for hook in hooks_to_trigger:
+			self.trigger_hook(hook)
+
+	def trigger_hook(self, hook):
+		name = ""
+		try: name = hook.__name__
+		except: name = __hook__.__class__.__name__
+
+		self.log("Triggering {0} hook: {1}...".format(self.get_task_id(), name))
+		hook(self)
 
 	def get_task_description(self):
 		
 		message = self.get_description()
 		if self.args or self.kwargs:
-			task_arguments = "The task was launched with the following arguments:\n\n"
+			task_arguments = "\nThe task was launched with the following arguments:\n\n"
 
-			for arg in self.args:
-				task_arguments += "- {0}\n".format(arg)
 
 			for key, value in self.kwargs.items():
 				task_arguments += "- {0} : {1}\n".format(key, value)
@@ -164,10 +204,7 @@ class AbstractBaseTask(object):
 			return self.start_message
 		return None
 
-	def parse_boolean(self, arg):
-		if arg.lower() in ['y', 'yes', True, 1, '1']:
-			return True
-		return False
+	
 
 class BaseTask(AbstractBaseTask, Task):
 	pass
@@ -182,12 +219,12 @@ class ConfirmTask(object):
 	default = False
 
 	expected_args = [
-		("confirm", False, "yes|y|1"),
+		Argument("confirm", False, "yes|y|1", strtobool, lambda v: isinstance(v, bool)),
 	]
 	def setup(self, *args, **kwargs):
-		self.confirmed = self.parse_boolean(kwargs.pop('confirm', False))
 		super(ConfirmTask, self).setup(*args, **kwargs)
-		if not self.confirmed:
+		confirm = self.kwargs.pop('confirm', False)
+		if not confirm:
 			if not self.subtask:
 				question = self.confirm_message + self.confirm_choice
 				self.confirmed = console.confirm(question, default=self.default)
@@ -195,23 +232,19 @@ class ConfirmTask(object):
 				if not self.confirmed:
 					sys.exit('Cancelling task...')	
 
-
 class TargetTask(BaseTask):	
 	target = None
 	expected_args = [
-		("target", True, "local|remote"),
+		Argument("target", True, "local|remote", lambda v: v, lambda v: v in ['local', 'remote']),
 	]
-	def check_args(self):
-		super(TargetTask, self).check_args()
-		if self.kwargs.get("target") is None:
-			try: 
-				self.target = self.args[0]
-				assert self.target in ['local', 'remote']
-				self.args.pop(0)
-				self.kwargs['target'] = self.target
-			except:
-				raise ArgumentError("You must provide a target argument [local|remote]") 
 
+	def trigger_hooks(self):
+		super(TargetTask, self).trigger_hooks()
+		task = self.get_task_id()
+		hooks = utils.setting("hooks", self.target, {})
+		hooks_to_trigger = [hook for key, hook in hooks.items() if key == task]
+		for hook in hooks_to_trigger:
+			self.trigger_hook(hook)
 
 class RunTarget(AbstractBaseTask):
 	"""Run a unix command on the target"""
@@ -247,7 +280,7 @@ class WP(TargetTask):
 
 		if utils.is_local(target):
 			with lcd(utils.setting("path", "local")):
-				return local("wp {0}".format(command))
+				return local("wp {0}".format(command), capture=True)
 
 		if utils.is_remote(target):
 			with cd(utils.setting("path", "remote")):
@@ -280,6 +313,7 @@ class WPCollectData(TargetTask):
 		data = {}
 		self.log('Collecting data about {0} Wordpress installation...'.format(target))
 		# get wordpress version
+
 		data['version'] = subtask(wp, target, "core version")
 
 		# get wordpress locale

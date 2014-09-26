@@ -1,8 +1,16 @@
 import base, fs, db, plugin, media as med, theme
+from base import wp
 import os, sys, ntpath, datetime
 from fabpress import utils
 from fabric.contrib import console
 from fabric.api import warn_only
+
+
+class SyncMediaTask(object):
+	expected_args = [
+		base.Argument("sync_media", False, "no|n|0", base.strtobool, lambda v: isinstance(v, bool)),
+	]
+
 
 class WPDrop(base.ConfirmTask, base.TargetTask):
 	"""Delete target files and database"""
@@ -16,7 +24,7 @@ wp_drop = WPDrop()
 
 class WPDownload(base.ConfirmTask, base.TargetTask):
 	"""Download at target a copy of origin Wordpress files (version and languages preserved)"""
-	name="download"
+	name ="download"
 
 	def operation(self, target, data=None):
 		origin = utils.reverse(target)
@@ -81,34 +89,32 @@ class WPMirror(base.ConfirmTask, base.TargetTask):
 
 wp_mirror = WPMirror()
 
-class WPPull(base.ConfirmTask, base.BaseTask):
+class WPPull(SyncMediaTask, base.ConfirmTask, base.BaseTask):
 	"""Sync database, themes, plugins and media files from remote to local installation"""
 
 	name="pull"
 
-	def operation(self, **kwargs):
-		base.subtask(sync, "local", **kwargs)
+	def operation(self, *args, **kwargs):
+		base.subtask(sync, "local", *args, **kwargs)
 
 pull = WPPull()
 
 
-class WPPush(base.ConfirmTask, base.BaseTask):
+class WPPush(SyncMediaTask, base.ConfirmTask, base.BaseTask):
 	"""Sync database, themes, plugins and media files from local to remote installation"""
 
 	name="push"
 
-	def operation(self, **kwargs):
-		base.subtask(sync, "remote", **kwargs)
+	def operation(self, *args, **kwargs):
+		base.subtask(sync, "remote", *args, **kwargs)
 
 push = WPPush()
 
-class WPSync(base.ConfirmTask, base.TargetTask):
+class WPSync(SyncMediaTask, base.ConfirmTask, base.TargetTask):
 	"""Sync target with origin database, themes, plugins and media files"""
 
 	name = "sync"
-	expected_args = [
-		("sync_media", False, "no|n|0"),
-	]
+	
 	def operation(self, target, sync_media=True, data=None):
 
 		origin = utils.reverse(target)
@@ -122,7 +128,7 @@ class WPSync(base.ConfirmTask, base.TargetTask):
 		base.subtask(theme.sync, target, data)
 		base.subtask(plugin.sync, target, data)
 
-		if self.parse_boolean(sync_media):
+		if base.strtobool(sync_media):
 			# download media files
 			base.subtask(med.sync, target)
 

@@ -1,6 +1,7 @@
 import base
 from fabpress import utils
 
+
 class WPPluginSync(base.TargetTask):
 	"""Download and activate origin plugins on target"""
 	name = "sync"
@@ -17,6 +18,5 @@ class WPPluginSync(base.TargetTask):
 				self.info('Installing plugin {0} ({1})...'.format(plugin.get("name"), plugin.get('version')))
 				command = "plugin install {0} --activate --version={1}".format(plugin.get("name"), plugin.get('version'))
 				base.subtask(base.wp, target, command)
-
 
 sync = WPPluginSync()

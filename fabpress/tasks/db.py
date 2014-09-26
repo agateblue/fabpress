@@ -58,7 +58,7 @@ class WPDBImport(base.ConfirmTask, base.TargetTask):
 		target_dump_path = os.path.join(utils.setting('dumps_path', target), ntpath.basename(path))
 		base.subtask(base.get_file, target=target, origin_path=path, target_path=target_dump_path)
 
-		self.log("Importing {0} into {0} database...".format(target_dump_path, starget))
+		self.log("Importing {0} into {1} database...".format(target_dump_path, target))
 		base.subtask(base.wp,target=target, command="db import '{0}'".format(target_dump_path))
 
 		# remove the backup file locally and remotely

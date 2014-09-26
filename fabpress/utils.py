@@ -7,11 +7,14 @@ def load_config(kwargs):
     output['stdout']= False    
 
 
-def setting(key, origin=None):
+def setting(key, origin=None, default=None):
     """return the setting for the given origin and the given key (if any)"""
     if origin is not None:
-        return settings.settings[origin][key]
-    return settings.settings[key]
+        try:
+            return settings.settings[origin][key]
+        except KeyError:
+            return default
+    return settings.settings.get(key, default)
 
 
 def reverse(origin):
