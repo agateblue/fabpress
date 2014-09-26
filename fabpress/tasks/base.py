@@ -27,6 +27,7 @@ class Argument(object):
 
 	def __init__(self, name, required=True, helper=None, parser=None, checker=None):
 
+		self.name = name
 		self.required = required
 		self.helper = helper
 		self.parser = parser
@@ -63,8 +64,8 @@ class AbstractBaseTask(object):
 
 
 		# put optional args at the end
-		required_args = [arg for arg in expected_args if arg[1] == True]
-		optional_args = [arg for arg in expected_args if arg[1] == False]
+		required_args = [arg for arg in expected_args if arg.required == True]
+		optional_args = [arg for arg in expected_args if arg.required == False]
 
 		return required_args + optional_args
 
@@ -81,11 +82,11 @@ class AbstractBaseTask(object):
 
 		args = ""
 
-		for arg_name, required, value, parser, checker in self.get_expected_args():
-			arg = "{0}=<{1}>".format(arg_name, value)
-			if not required:
-				arg = "[" + arg + "]"
-			args = args + arg + ","
+		for arg in self.get_expected_args():
+			arg_text = "{0}=<{1}>".format(arg.name, arg.helper)
+			if not arg.required:
+				arg_text = "[" + arg_text + "]"
+			args = args + arg_text + ","
 
 		# remove coma
 		args = args[:-1]
@@ -136,6 +137,14 @@ class AbstractBaseTask(object):
 		self.show = self.kwargs.pop('show', self.show)
 		self.subtask = self.kwargs.pop('subtask', False)
 		self.silent = self.kwargs.pop('silent', False)
+
+		try:
+			if self.args[0] == "help":
+				self.log(self.get_usage())
+				sys.exit()
+		except IndexError:
+			pass
+			
 		try:		
 			self.check_args()
 		except ArgumentError, e:
@@ -223,7 +232,7 @@ class ConfirmTask(object):
 	]
 	def setup(self, *args, **kwargs):
 		super(ConfirmTask, self).setup(*args, **kwargs)
-		confirm = self.kwargs.pop('confirm', False)
+		confirm = strtobool(self.kwargs.pop('confirm', False))
 		if not confirm:
 			if not self.subtask:
 				question = self.confirm_message + self.confirm_choice
