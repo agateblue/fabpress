@@ -15,7 +15,11 @@ def strtobool(v):
 
 	if v in ['y', 'yes', True, 1, '1']:
 		return True
-	return False
+
+	if v in ['n', 'no', False, 0, '0']:
+		return False
+
+	raise TypeError('Cannot convert value {0} to boolean'.format(v))
 
 class Argument(object):
 
@@ -48,9 +52,12 @@ class AbstractBaseTask(object):
 	silent = False
 	subtask = False
 	expected_args = []
+	called_via_fab = True
+	_called_via_fab = True
 
 	def __call__(self, *args, **kwargs):
 
+		self._called_via_fab = False
 		return self.run(*args, **kwargs)
 		
 	def get_expected_args(self):
@@ -127,8 +134,53 @@ class AbstractBaseTask(object):
 				self.info(message.capitalize() + "...")
 
 	
+	def check_arg(self, value, expected):
+		"""Check if a single argument pass validation"""
+		e = ArgumentError('Value {0} does not pass validation for argument {1}.\n\tAccepted values: {2}'.format(value, expected.name, expected.helper))
+		try:
+			parsed_value = expected.parser(value)
+		except:
+			raise e
+
+		validate = expected.checker(parsed_value)
+		if not validate:
+			raise e
+		return parsed_value
+
 	def check_args(self):
-		pass
+		"""Trigger arguments checking"""
+
+		expected = self.get_expected_args()
+		required = [arg for arg in expected if arg.required]
+
+		if len(self.args) + len(self.kwargs) > len(expected):
+			raise ArgumentError('Too many arguments for this task')
+
+		if len(self.args) + len(self.kwargs) < len(required):
+			raise ArgumentError('Missing required arguments for this task')
+
+		done = 0
+		new_kwargs = {}
+		for index, value in enumerate(self.args):
+
+			x = expected[index]
+			parsed_value = self.check_arg(value, x)
+			new_kwargs[x.name] = parsed_value
+			done += 1
+
+		for arg, value in self.kwargs.items():
+			try:
+				x = [ex_arg for ex_arg in expected[done:] if arg == ex_arg.name][0]
+			except IndexError:
+				raise ArgumentError('{0} is not a registered argument for this task'.format(arg))
+			parsed_value = self.check_arg(value, x)
+			new_kwargs[x.name] = parsed_value
+			done += 1
+
+
+		# arguments will be explicitly passed via keyword, so clean args and update kwargs
+		self.args = []		
+		self.kwargs.update(new_kwargs)
 
 	def setup(self, *args, **kwargs):
 		self.kwargs = kwargs
@@ -138,25 +190,28 @@ class AbstractBaseTask(object):
 		self.subtask = self.kwargs.pop('subtask', False)
 		self.silent = self.kwargs.pop('silent', False)
 
-		try:
-			if self.args[0] == "help":
+		if self.called_via_fab:				
+			try:
+				if self.args[0] == "help":
+					self.log(self.get_usage())
+					sys.exit()
+			except IndexError:
+				pass
+				
+			try:		
+				self.check_args()
+			except ArgumentError, e:
+				self.error("\nThe task was called incorrectly:\n\n\t{0}.\n\nPlease refer to task usage:".format(str(e)))
 				self.log(self.get_usage())
 				sys.exit()
-		except IndexError:
-			pass
-			
-		try:		
-			self.check_args()
-		except ArgumentError, e:
-			self.error("\nThe task was called with incorrectly: {0}. Please refer to task usage:".format(str(e)))
-			self.log(self.get_usage())
-			sys.exit()
 
 		if not self.subtask:
 			message = self.get_task_description()
 			self.log(message)
 
-	def run(self, *args, **kwargs):	
+	def run(self, *args, **kwargs):
+		self.called_via_fab = self._called_via_fab
+		self._called_via_fab = True
 		try:
 			assert args[0] == "help"
 			self.log(self.get_usage())
