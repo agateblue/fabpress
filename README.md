@@ -1,4 +1,29 @@
 
+# Why ?
+
+If you want to developp locally with Wordpress, you usually have to follow these steps: 
+
+- install a local copy of Wordpress
+- import your production MySQL database
+- search and replace permalinks in database (`http://mysite.com` to `localhost/projects/blast`)
+- install all your plugins and themes with correct versions
+- download media files
+
+Then, each time there is a change on production website and you need to pull these changes, you have to go through the same steps. And the same thing happens if you want to deploy your local website in production.
+
+Going through these steps is a nightmare and this is why I wrote fabpress: I wanted a command-line tool that would let me mirror a Wordpress installation via a single command.
+
+# What is fabpress ?
+
+- a bunch of scripts, writtent in Python on top of Fabric and WP-CLI, two awesome tools.
+- a way to pull/push database, media files, themes, plugins from/to your production wordpress website
+- a command-line tool, tested on ArchLinux and Debian, that could probably work on Mac OS and other Linux distributions
+- free (as in free speech and free beer), open-source, licensed under GPL3
+
+
+# What is not fabpress ?
+
+- production-ready. I use it on my projects, and it works. There is absolutely no warranty it will work for you, with your setup. Before trying it, please, create backups of your data. I mean it, seriously.
 
 
 # Requirements
@@ -11,7 +36,16 @@
 Please install wp-cli on both local and remote server before going any further.
 
 
+# Use case
+
+For easier explanation, I will assume you have a production Wordpress instance, at URL `http://site.com`. This website works fine, but you need to replace the current theme with your own theme, named `blast`. You want to develop and test this theme locally, on your computer before deploying it on your production website.
+
+Your themes files are located on your computer at `/home/user/projects/blast`, and you've created a directory for your local Wordpress instance at `/var/www/site.com`.
+
+
 # Configuration
+
+First, create a file `fabfile.py` 
 
 If you want to enable .htaccess generation, please follow the instructions from [here](http://wp-cli.org/commands/rewrite/flush/) and [here](http://wp-cli.org/config/). If you don't do this, after mirroring a Wordpress installation, you'll have to log into your mirrored installation and save permalinks manually.
 
