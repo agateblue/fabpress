@@ -4,6 +4,7 @@ import os
 
 class WPThemeSync(base.TargetTask):
     """Download and activate origin themes on target"""
+    
     name = "sync"
 
     def operation(self, target, data=None):

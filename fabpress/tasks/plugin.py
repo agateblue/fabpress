@@ -4,6 +4,7 @@ from fabpress import utils
 
 class WPPluginSync(base.TargetTask):
 	"""Download and activate origin plugins on target"""
+	
 	name = "sync"
 
 	def operation(self, target, data=None):

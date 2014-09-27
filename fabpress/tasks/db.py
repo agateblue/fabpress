@@ -16,10 +16,15 @@ class WPDBSync(base.ConfirmTask, base.TargetTask):
 		return "{0} database has been successfully imported to {1}".format(utils.reverse(self.target), self.target)
 
 	def operation(self, target):
-		origin = utils.reverse(target)
-		
+		origin = utils.reverse(target)	
+
+		# create the backup	
 		backup_path = base.subtask(export, target=origin)
+
+		# import it
 		base.subtask(imp, target=target, path=backup_path)
+
+		# update permalinks
 		base.subtask(permalink_fix, target=target)
 
 sync = WPDBSync()

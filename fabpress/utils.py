@@ -27,6 +27,5 @@ def reverse(origin):
 def is_local(origin):
     return origin == "local"
 
-
 def is_remote(origin):
     return origin == "remote"

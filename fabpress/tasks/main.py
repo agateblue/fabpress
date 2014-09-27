@@ -7,13 +7,16 @@ from fabric.api import warn_only
 
 
 class SyncMediaTask(object):
+	"""A task that involve media synchronisation. As it his a heavy and bandwith intensive operation,
+	it adds a `sync_media` arguments to disable it when needed""" 
+
 	expected_args = [
 		base.Argument("sync_media", False, "no|n|0", base.strtobool, lambda v: isinstance(v, bool)),
 	]
 
 
 class WPDrop(base.ConfirmTask, base.TargetTask):
-	"""Delete target files and database"""
+	"""Delete target files and database. Will also delete the installation parent directory."""
 	name = "drop"
 
 	def operation(self, target):

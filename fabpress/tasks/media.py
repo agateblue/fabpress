@@ -4,6 +4,7 @@ from fabpress import utils
 
 class WPMediaSync(base.ConfirmTask, base.TargetTask):
 	"""Download origin media files to target"""
+    
 	name = "sync"
 
 	def get_start_message(self):
