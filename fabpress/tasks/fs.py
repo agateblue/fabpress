@@ -1,7 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import base
 import os
 from fabpress import utils
-
+from fabric.api import hide, warn_only
 
 class WPFilesDrop(base.ConfirmTask, base.TargetTask):
 	"""Remove all files of target, including target directory"""
@@ -15,46 +18,31 @@ class WPFilesDrop(base.ConfirmTask, base.TargetTask):
 drop = WPFilesDrop()
 
 
-
-
 class WPSymlink(base.BaseTask):
-	"""Create a symlink"""
-
-	name = "symlink"
-
-	def operation(self, symlink_target, path):
-		self.info("Symlinking {0} to {1}".format(symlink_target, path))
-		command = 'local', "ln -s '{0}' '{1}'".format(symlink_target, path)
-		try:
-			base.subtask(base.run_target, 'local', command)
-			self.info("Symlink created")
-		except:
-			self.info("Cannot create symlink, he probably already exists")
-
-symlink = WPSymlink()
-
-class WPSymlinks(base.BaseTask):
-    """Create symlinks to local themes on plugins on local installation"""
+    """Create a symlink on local to target directory"""
 
     name = "symlinks"
+    symlink_directory = ""
+    target = "local"
 
-    def operation(self):
-        self.info("Symlinking themes...")
-        base.subtask(theme_symlinks)
+    def operation(self, target, symlink_name):
+        path = os.path.join(utils.setting('path', self.target), self.symlink_directory, symlink_name)
+        self.info("Symlinking {0} to {1}".format(target, path))
+        command = "ln -s '{0}' '{1}'".format(target, path)
+        with hide('everything'), warn_only():
+            base.subtask(base.run_target, 'local', command)
 
-symlinks = WPSymlinks()
+
+class WPPluginSymlink(WPSymlink):
+	symlink_directory="wp-content/plugins"
+
+class WPThemeSymlink(WPSymlink):
+	symlink_directory="wp-content/themes"
 
 
-class WPThemeSymlinks(base.BaseTask):
-	"""Create local symlinks for themes listed in settings.local.symlink_themes"""
-	name = "theme_symlinks"
+def plugin_symlink(target, symlink_name):
+    return base.subtask(WPPluginSymlink(), target, symlink_name)
 
-	def operation(self):
-		themes = utils.setting("symlink_themes", "local")
-		themes_path = os.path.join(utils.setting("path", "local"), "wp-content", "themes")
+def theme_symlink(target, symlink_name):
+    return base.subtask(WPThemeSymlink(), target, symlink_name)
 
-		for theme_name, theme_path in themes:
-			symlink_destination = os.path.join(themes_path, theme_name)
-			base.subtask(symlink, theme_path, symlink_destination)
-
-theme_symlinks = WPThemeSymlinks()

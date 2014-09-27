@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import base
 import os, sys, ntpath, datetime
 from fabpress import utils

@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from fabric.tasks import Task
 from fabric.contrib import console
 from fabric import colors, operations, state, api
@@ -43,7 +46,7 @@ class ArgumentError(Exception):
 
 class AbstractBaseTask(object):
 	"""The base class for every task. Will not be detected by fabric as a registered task,
-	since it does not inherit from `fabric.tasks.Task`
+	since it does not inherit from `fabric.tasks.Task`"""
 	name = None
 	start_message = None
 	kwargs = {}
@@ -121,13 +124,13 @@ class AbstractBaseTask(object):
 		if self.subtask:
 			self.log(message, None, bold, prefix)
 		else:
-			self.log(message, "green", bold, prefix)
+			self.log(message, None, bold, prefix)
 
 	def info(self, message, bold=False, prefix=True):
 		if self.subtask:
 			self.log(message, None, bold, prefix)
 		else:
-			self.log(message, "yellow", bold, prefix)
+			self.log(message, None, bold, prefix)
 
 	def error(self, message, bold=False, prefix=False):
 		self.log(message, "red", bold, prefix=prefix, force=True)
@@ -251,7 +254,7 @@ class AbstractBaseTask(object):
 	def trigger_hooks(self):
 		"""User can register hooks in settings. We trigger them here"""
 
-		task = self.get_task_id()		
+		task = self.get_task_id()
 		hooks = utils.setting("hooks")
 		hooks_to_trigger = [hook for key, hook in hooks.items() if key == task]
 		for hook in hooks_to_trigger:
@@ -259,13 +262,26 @@ class AbstractBaseTask(object):
 
 	def trigger_hook(self, hook):
 		"""Trigger a single hook"""
+		
+		# hook is a callable, so call it
+		if hasattr(hook, '__call__'):
+			name = ""
+			try: name = hook.__name__
+			except: name = __hook__.__class__.__name__
+			self.log("Triggering {0} hook: {1}...".format(self.get_task_id(), name))
+			hook()
+			return 
 
-		name = ""
-		try: name = hook.__name__
-		except: name = __hook__.__class__.__name__
+		# hook is an iterable with the callback first, then arguments
+		if hasattr(hook, '__iter__'):
+			callback = hook[0]
+			name = ""
+			try: name = callback.__name__
+			except: name = callback.__class__.__name__
+			self.log("Triggering {0} hook: {1}...".format(self.get_task_id(), name))
+			callback(*hook[1:])
 
-		self.log("Triggering {0} hook: {1}...".format(self.get_task_id(), name))
-		hook(self)
+
 
 	def get_task_description(self):
 		"""Return the task effect, and passed arguments as a string"""
@@ -275,7 +291,7 @@ class AbstractBaseTask(object):
 			task_arguments = "\nThe task was launched with the following arguments:\n\n"
 
 			for key, value in self.kwargs.items():
-				task_arguments += "- {0} : {1}\n".format(key, value)
+				task_arguments += "\t- {0} : {1}\n".format(key, value)
 
 			message += task_arguments
 
@@ -326,12 +342,19 @@ class TargetTask(BaseTask):
 		Argument("target", True, "local|remote", lambda v: v, lambda v: v in ['local', 'remote']),
 	]
 
+	def setup(self, *args, **kwargs):
+		"""Add a self.target attribute"""
+		super(TargetTask, self).setup(*args, **kwargs)
+		self.target = kwargs.get('target', args[0])
+
+
 	def trigger_hooks(self):
 		"""Trigger target specific hooks"""
 		super(TargetTask, self).trigger_hooks()
 
 		task = self.get_task_id()
 		hooks = utils.setting("hooks", self.target, {})
+
 		hooks_to_trigger = [hook for key, hook in hooks.items() if key == task]
 		for hook in hooks_to_trigger:
 			self.trigger_hook(hook)

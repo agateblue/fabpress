@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import base, fs, db, plugin, media as med, theme
 from base import wp
 import os, sys, ntpath, datetime
@@ -135,8 +138,6 @@ class WPSync(SyncMediaTask, base.ConfirmTask, base.TargetTask):
 			# download media files
 			base.subtask(med.sync, target)
 
-		# create required symlinks
-		base.subtask(fs.symlinks)
 
 sync = WPSync()
 
