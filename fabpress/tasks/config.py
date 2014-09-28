@@ -12,7 +12,7 @@ class ConfigCreate(base.BaseTask):
             False, 
             "/path/to/store/fab_settings.py (default is './fab_settings.py')", 
             lambda v: v, 
-            lambda v: v),
+            lambda v: True),
     ]
 
     def operation(self, path="./fab_settings.py"):

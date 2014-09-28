@@ -79,12 +79,11 @@ class AbstractBaseTask(object):
 		for parent in parents:
 			for arg in parent.expected_args:
 				if arg not in expected_args:
-					expected_args.append(arg)
+					expected_args = [arg] + expected_args
 
 		# put optional args at the end
 		required_args = [arg for arg in expected_args if arg.required == True]
 		optional_args = [arg for arg in expected_args if arg.required == False]
-
 		return required_args + optional_args
 
 	def get_description(self):		
@@ -99,7 +98,6 @@ class AbstractBaseTask(object):
 		"""Return the documentation of this task as a string"""
 
 		description = self.get_description()
-
 		args = ""
 		for arg in self.get_expected_args():
 			arg_text = "{0}=<{1}>".format(arg.name, arg.helper)
@@ -111,7 +109,7 @@ class AbstractBaseTask(object):
 		args = args[:-1]
 
 		command = "\n" + description + "\nTask usage: \n\n   fab fp.{0}:{1}\n".format(self.get_task_id(), args)
-
+		
 		return command
 
 	def log(self, message, color=None, bold=False, indentation=1, force=False):
@@ -246,6 +244,7 @@ class AbstractBaseTask(object):
 		try:
 			# display help if the users ask for it, then exit
 			assert args[0] == "help"
+			self.logging = True
 			self.log(self.get_usage())
 			return
 		except: 
@@ -423,21 +422,32 @@ class WP(TargetTask):
 	
 	name = "wp"
 	logging = False
+
+	expected_args = [
+		Argument("command", True, "a wp-cli command, without 'wp'", lambda v: v, lambda v: True),
+	]
+
 	def setup(self, *args, **kwargs):
 		# do not display output if it is a subtask
-		if self.parent is None:
+
+		if self.called_via_fab:
 			kwargs['show'] = ["stdout"]
+			self.logging = True
 		super(WP, self).setup(*args, **kwargs)
 
 	def operation(self, target, command):	
 		"""run a wpcli command on local or remote"""
 		if utils.is_local(target):
 			with lcd(utils.setting("path", "local")):
-				return local("wp {0}".format(command), capture=True)
+				r = local("wp {0}".format(command), capture=True)
 
 		if utils.is_remote(target):
 			with cd(utils.setting("path", "remote")):
-				return run("wp {0}".format(command))
+				r = run("wp {0}".format(command))
+
+		if self.called_via_fab:
+			self.log(r)
+		return r
 
 wp = WP()
 

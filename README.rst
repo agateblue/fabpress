@@ -116,6 +116,31 @@ Note that fabpress help and documentation sometimes mentions `origin`. This term
 If you run `fab.main.sync:remote`, `origin` designate your local Wordpress instance.
 
 
+Available tasks
+===============
+
+Output from `fab -l`::
+    
+    fp.config.create         Create a config file from fabpress sample
+    fp.db.clear_backups      Remove backup files on target
+    fp.db.export             Export the database from target installation to the given path
+    fp.db.fix_permalinks     Search and replace all occurence of origin domain with target domain
+    fp.db.import             Import the database dump at origin path to the target
+    fp.db.reset              Delete all tables in target database
+    fp.db.sync               Sync target database with origin, replacing origin permalinks with target permalinks
+    fp.fs.drop               Remove all files of target, including target directory
+    fp.main.download         Download at target a copy of origin Wordpress files (version and languages preserved)
+    fp.main.drop             Delete target files and database. Will also delete the installation parent directory.
+    fp.main.help             Get some help
+    fp.main.mirror           Create at target an exact mirror of origin wordpress installation
+    fp.main.pull             Sync database, themes, plugins and media files from remote to local installation
+    fp.main.push             Sync database, themes, plugins and media files from local to remote installation
+    fp.main.sync             Pull origin database, themes, plugins and media files to target
+    fp.main.wp               Run a wp-cli command on the target. You don't need to prefix it with 'wp', it will be added automatically
+    fp.media.sync            Download origin media files to target
+    fp.plugin.sync           Download and activate origin plugins on target
+    fp.theme.sync            Download and activate origin themes on target
+
 
 
 Limitations

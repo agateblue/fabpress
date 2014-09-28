@@ -18,7 +18,7 @@ class WPFilesDrop(base.ConfirmTask, base.TargetTask):
 drop = WPFilesDrop()
 
 
-class WPSymlink(base.BaseTask):
+class WPSymlink(base.AbstractBaseTask):
     """Create a symlink on local to target directory"""
 
     name = "symlinks"
