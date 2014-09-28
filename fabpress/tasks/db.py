@@ -8,7 +8,7 @@ from fabpress import utils
 
 class WPDBSync(base.ConfirmTask, base.TargetTask):
 
-	"""Sync target database with origin"""
+	"""Sync target database with origin, replacing origin permalinks with target permalinks"""
 
 	name="sync"
 

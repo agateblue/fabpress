@@ -10,7 +10,7 @@ class ConfigCreate(base.BaseTask):
         base.Argument(
             "path", 
             False, 
-            "/path/to/config.py (default is './fab_settings.py')", 
+            "/path/to/store/fab_settings.py (default is './fab_settings.py')", 
             lambda v: v, 
             lambda v: v),
     ]

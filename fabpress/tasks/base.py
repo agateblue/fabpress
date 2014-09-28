@@ -74,12 +74,12 @@ class AbstractBaseTask(object):
 		Required argument are placed first in the list"""
 
 		parents = self.__class__.__bases__
-		expected_args = []
+		expected_args = self.expected_args
 
 		for parent in parents:
-			try: 
-				expected_args += parent.expected_args
-			except: pass
+			for arg in parent.expected_args:
+				if arg not in expected_args:
+					expected_args.append(arg)
 
 		# put optional args at the end
 		required_args = [arg for arg in expected_args if arg.required == True]
@@ -101,7 +101,6 @@ class AbstractBaseTask(object):
 		description = self.get_description()
 
 		args = ""
-
 		for arg in self.get_expected_args():
 			arg_text = "{0}=<{1}>".format(arg.name, arg.helper)
 			if not arg.required:
@@ -229,7 +228,7 @@ class AbstractBaseTask(object):
 				self.check_args()
 
 			except ArgumentError, e:
-				self.error("\nThe task was called incorrectly:\n\n\t{0}.\n\nPlease refer to task usage:".format(str(e)))
+				self.error("\nThe task was called incorrectly:\n\n   {0}.\n\nPlease refer to task usage:".format(str(e)))
 				self.log(self.get_usage())
 				sys.exit()
 

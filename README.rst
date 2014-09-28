@@ -79,6 +79,44 @@ After that, you can edit the file (it is heavily commented)::
 
     nano fab_settings.py
 
+After that, well, you're almost good to go.
+
+A bit of theory
+===============
+
+Tasks
+*****
+
+A task is an action you can run from command line, using the following notation::
+
+    fab command:argument1=value,argument2="value"
+
+    # Quotes and arguments name are not mandatory
+    fab command:value1,value2
+
+    # Some tasks just don't need arguments
+    fab command
+
+You can list available commands via `fab -l` and get additionnal informations about a fabpress task, with `fab fp.<command_name>:help`.
+
+Targets
+*******
+
+In fabpress, many tasks can be run independantly on remote or local Wordpress instance. For exemple, take the following tasks::
+
+    fab fp.db.sync:local
+    fab fp.db.sync:remote
+
+The first one will create a backup of your remote database, download it and import it into your local wordpress instance. The second one will do the opposite: backup your local database, upload it and import it into your remote instance.
+
+When a task require a target argument, which value can be either `remote` or `local`, it usually means data (database, media files, plugins, themes...) will be imported INTO your target wordpress instance. Some tasks do not import data, but still require a target: `fab fp.db.reset:<target>` will reset all database tables of targeted installation. 
+
+Note that fabpress help and documentation sometimes mentions `origin`. This term is a shortcut for designating the opposite of a target. With the following command `fab.main.sync:local` your target is `local`, and `origin` is your remote installation, from where data will be imported. 
+
+If you run `fab.main.sync:remote`, `origin` designate your local Wordpress instance.
+
+
+
 
 Limitations
 ===========
