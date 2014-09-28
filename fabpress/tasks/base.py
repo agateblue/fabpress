@@ -111,21 +111,18 @@ class AbstractBaseTask(object):
 		# remove coma
 		args = args[:-1]
 
-		command = "\n" + description + "\nTask usage: \n\n\tfab fp.{0}:{1}\n".format(self.get_task_id(), args)
+		command = "\n" + description + "\nTask usage: \n\n   fab fp.{0}:{1}\n".format(self.get_task_id(), args)
 
 		return command
 
 	def log(self, message, color=None, bold=False, indentation=1, force=False):
-		if self.logging:
-			i = "   " * (self.get_parent_level() + indentation)
-
-			
-			message = i + message
-			if force or not self.silent:			
-				if color is not None:
-					print(getattr(colors, color)(message, bold=bold))
-				else:
-					print(message)
+		if self.logging or force:
+			i = "   " * (self.get_parent_level() + indentation)			
+			message = i + message			
+			if color is not None:
+				print(getattr(colors, color)(message, bold=bold))
+			else:
+				print(message)
 
 	def success(self, message, bold=False):
 		if self.parent is None:
@@ -223,7 +220,6 @@ class AbstractBaseTask(object):
 		self.args = list(args)
 		self.hide = self.kwargs.pop('hide', self.hide)
 		self.show = self.kwargs.pop('show', self.show)
-		self.silent = self.kwargs.pop('silent', False)
 
 		# task is called via command-line
 		if self.called_via_fab:						
@@ -248,13 +244,13 @@ class AbstractBaseTask(object):
 		# check if the task is called via Python or via `fab` in terminal
 		self.called_via_fab = self._called_via_fab
 		self._called_via_fab = True
-
 		try:
 			# display help if the users ask for it, then exit
 			assert args[0] == "help"
 			self.log(self.get_usage())
 			return
-		except: pass
+		except AssertionError: 
+			pass
 
 		self.setup(*args, **kwargs)		
 		self.pre_run()
@@ -286,8 +282,7 @@ class AbstractBaseTask(object):
 			self.trigger_hook(hook)
 
 	def trigger_hook(self, hook):
-		"""Trigger a single hook"""
-		
+		"""Trigger a single hook"""		
 
 		# hook is a callable, so call it
 		if hasattr(hook, '__call__'):
@@ -317,8 +312,6 @@ class AbstractBaseTask(object):
 			else:
 				self.log(log)
 				callback(*hook[1:])
-
-
 
 	def get_task_description(self):
 		"""Return the task effect, and passed arguments as a string"""

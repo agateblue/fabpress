@@ -15,9 +15,6 @@ class WPDBSync(base.ConfirmTask, base.TargetTask):
 	def get_start_message(self):
 		return "Syncing databases (from {0} to {1})".format(utils.reverse(self.target), self.target)
 
-	def get_success_message(self):
-		return "{0} database has been successfully imported to {1}".format(utils.reverse(self.target), self.target)
-
 	def operation(self, target):
 		origin = utils.reverse(target)	
 
