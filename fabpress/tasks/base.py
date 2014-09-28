@@ -249,7 +249,7 @@ class AbstractBaseTask(object):
 			assert args[0] == "help"
 			self.log(self.get_usage())
 			return
-		except AssertionError: 
+		except: 
 			pass
 
 		self.setup(*args, **kwargs)		

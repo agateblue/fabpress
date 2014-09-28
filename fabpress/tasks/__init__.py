@@ -1,2 +1,2 @@
-import db, media, theme, plugin, fs, main
+import db, media, theme, plugin, fs, main, config
 

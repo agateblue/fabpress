@@ -37,8 +37,8 @@ On local machine
 ****************
 
 - Python 2.7
-- Fabric_. for managing connexion to server and calling commands
-- WP-CLI_. for dealing with most of the Wordpress stuff
+- Fabric_ for managing connexion to server and calling commands
+- WP-CLI_ for dealing with most of the Wordpress stuff
 
 On remote machine
 *****************
@@ -48,7 +48,7 @@ On remote machine
 On both
 *******
 
-- [WP-CLI](http://wp-cli.org/) for dealing with most of the Wordpress stuff
+- WP-CLI_ for dealing with most of the Wordpress stuff
 - A Linux system (fabpress was developped and tested on Archlinux and Debian Wheezy)
 
 Use case
@@ -61,16 +61,30 @@ Your themes files are located on your computer at `/home/user/projects/blast`, a
 Configuration
 =============
 
-First, create a file `fabfile.py` 
+First, move into your project directory::
 
-If you want to enable .htaccess generation, please follow the instructions from [here](http://wp-cli.org/commands/rewrite/flush/) and [here](http://wp-cli.org/config/). If you don't do this, after mirroring a Wordpress installation, you'll have to log into your mirrored installation and save permalinks manually.
+    cd /home/user/projects/blast
+
+Create a file `fabfile.py` in your project directory::
+
+    echo 'from fabpress import tasks as fp' >> /home/user/projects/blast/fabfile.py
+
+Then, generate a config file::
+    
+    fab fp.config.create
+
+This will create a `fab_settings.py` file in your project directory. Fell free to add it to your VCS ignored files.
+
+After that, you can edit the file (it is heavily commented)::
+
+    nano fab_settings.py
 
 
 Limitations
 ===========
 
 - for some reasons, when mirroring a Wordpress installation for the first time, you'll have to manually save the permalinks from the admin, in order to load Custom Posts Types permalinks. Else, accessing a CPT detail page would raise a 404.
-
+- Will only download Themes and Plugins available on wordpress.org
 
 Contribute
 ==========
