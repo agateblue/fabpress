@@ -345,7 +345,11 @@ class TargetTask(BaseTask):
 	def setup(self, *args, **kwargs):
 		"""Add a self.target attribute"""
 		super(TargetTask, self).setup(*args, **kwargs)
-		self.target = kwargs.get('target', args[0])
+
+		target = kwargs.get('target')
+		if target is None:
+			target = args[0]
+		self.target = target
 
 
 	def trigger_hooks(self):

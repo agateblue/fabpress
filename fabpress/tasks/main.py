@@ -117,7 +117,7 @@ class WPPush(SyncMediaTask, base.ConfirmTask, base.BaseTask):
 push = WPPush()
 
 class WPSync(SyncMediaTask, base.ConfirmTask, base.TargetTask):
-	"""Sync target with origin database, themes, plugins and media files"""
+	"""Pull origin database, themes, plugins and media files to target"""
 
 	name = "sync"
 	
