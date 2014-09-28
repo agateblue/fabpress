@@ -13,7 +13,7 @@ class WPThemeSync(base.TargetTask):
     def operation(self, target, data=None):
         origin = utils.reverse(target)
         if data is None:
-            data = base.subtask(base.collect_data, origin)
+            data = self.subtask(base.collect_data, origin)
 
         for theme in data['themes']:
 
@@ -22,7 +22,7 @@ class WPThemeSync(base.TargetTask):
             else:
                 self.info('Installing theme {0} ({1})...'.format(theme.get("name"), theme.get('version')))
                 command = "theme install {0} --activate --version={1}".format(theme.get("name"), theme.get('version'))
-                base.subtask(base.wp, target, command)
+                self.subtask(base.wp, target, command)
 
 
 sync = WPThemeSync()

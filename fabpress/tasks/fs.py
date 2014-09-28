@@ -13,7 +13,7 @@ class WPFilesDrop(base.ConfirmTask, base.TargetTask):
 
 	def operation(self, target):
 		command = 'find {0}/ -name "*" | xargs rm -rf '.format(os.path.join(utils.setting("path", target)))
-		base.subtask(base.run_target, target=target, command=command)
+		self.subtask(base.run_target, target=target, command=command)
 
 drop = WPFilesDrop()
 
@@ -30,7 +30,7 @@ class WPSymlink(base.BaseTask):
         self.info("Symlinking {0} to {1}".format(target, path))
         command = "ln -s '{0}' '{1}'".format(target, path)
         with hide('everything'), warn_only():
-            base.subtask(base.run_target, 'local', command)
+            self.subtask(base.run_target, 'local', command)
 
 
 class WPPluginSymlink(WPSymlink):
@@ -40,9 +40,5 @@ class WPThemeSymlink(WPSymlink):
 	symlink_directory="wp-content/themes"
 
 
-def plugin_symlink(target, symlink_name):
-    return base.subtask(WPPluginSymlink(), target, symlink_name)
-
-def theme_symlink(target, symlink_name):
-    return base.subtask(WPThemeSymlink(), target, symlink_name)
-
+plugin_symlink = WPPluginSymlink()
+theme_symlink = WPThemeSymlink()

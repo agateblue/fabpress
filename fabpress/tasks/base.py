@@ -53,17 +53,20 @@ class AbstractBaseTask(object):
 	args = {}
 	hide = ['commands']
 	show = []
-	silent = False
-	subtask = False
+	parent = None
 	expected_args = []
 	called_via_fab = True
 	_called_via_fab = True
+	logging = True
+
 
 	def __call__(self, *args, **kwargs):
 		"""Fabric uses self.run to run a task, 
 		so we can reliably says that when __call__ is called, the task is run directly via a python script"""
-
+		self.parent = kwargs.pop('parent', None)
 		self._called_via_fab = False
+		self.logging = kwargs.pop('logging', self.logging)
+		self.start_message = kwargs.pop('start_message', self.start_message)
 		return self.run(*args, **kwargs)
 		
 	def get_expected_args(self):
@@ -85,7 +88,7 @@ class AbstractBaseTask(object):
 		return required_args + optional_args
 
 	def get_description(self):		
-		return """Task description:\n\n\t{0}\n""".format(self.__class__.__doc__)
+		return """Task description:\n\n   {0}\n""".format(self.__class__.__doc__)
 
 	def get_task_id(self):
 		"""Get the task identifier, such as module.task"""
@@ -112,36 +115,41 @@ class AbstractBaseTask(object):
 
 		return command
 
-	def log(self, message, color=None, bold=False, prefix=True, force=False):
+	def log(self, message, color=None, bold=False, indentation=1, force=False):
+		if self.logging:
+			i = "   " * (self.get_parent_level() + indentation)
 
-		if force or not self.silent:			
-			if color is not None:
-				print(getattr(colors, color)(message, bold=bold))
-			else:
-				print(message)
+			
+			message = i + message
+			if force or not self.silent:			
+				if color is not None:
+					print(getattr(colors, color)(message, bold=bold))
+				else:
+					print(message)
 
-	def success(self, message, bold=False, prefix=True):
-		if self.subtask:
-			self.log(message, None, bold, prefix)
+	def success(self, message, bold=False):
+		if self.parent is None:
+			self.log(message, None, bold)
 		else:
-			self.log(message, None, bold, prefix)
+			self.log(message, None, bold)
 
-	def info(self, message, bold=False, prefix=True):
-		if self.subtask:
-			self.log(message, None, bold, prefix)
+	def info(self, message, bold=False):
+		if self.parent is None:
+			self.log(message, None, bold)
 		else:
-			self.log(message, None, bold, prefix)
+			self.log(message, None, bold)
 
-	def error(self, message, bold=False, prefix=False):
-		self.log(message, "red", bold, prefix=prefix, force=True)
+	def error(self, message, bold=False):
+		self.log(message, "red", bold, force=True)
 
 
 	def pre_run(self):
 		"""Called just before `self.run`"""
-		if not self.subtask:
+		if self.logging:
 			message = self.get_start_message()
+
 			if message: 
-				self.info(message.capitalize() + "...")
+				self.log(message.capitalize(), indentation=0)
 
 	
 	def check_arg(self, value, expected):
@@ -156,6 +164,20 @@ class AbstractBaseTask(object):
 		if not validate:
 			raise e
 		return parsed_value
+
+	def get_parent_level(self):
+		if self.parent is None:
+			return 0
+		else:
+			l = 0
+			parent = self.parent
+			while 1:
+				if parent is not None:
+					l += 1
+					parent = parent.parent
+				else:
+					break
+			return l
 
 	def check_args(self):
 		"""Trigger arguments checking"""
@@ -201,7 +223,6 @@ class AbstractBaseTask(object):
 		self.args = list(args)
 		self.hide = self.kwargs.pop('hide', self.hide)
 		self.show = self.kwargs.pop('show', self.show)
-		self.subtask = self.kwargs.pop('subtask', False)
 		self.silent = self.kwargs.pop('silent', False)
 
 		# task is called via command-line
@@ -216,9 +237,9 @@ class AbstractBaseTask(object):
 				self.log(self.get_usage())
 				sys.exit()
 
-		if not self.subtask:
+		if self.called_via_fab:
 			message = self.get_task_description()
-			self.log(message)
+			print(message)
 
 	def run(self, *args, **kwargs):
 		"""Called by fabric. Will set up the task and launch it. 
@@ -251,6 +272,10 @@ class AbstractBaseTask(object):
 		with show('everything'):
 			self.trigger_hooks()
 
+		# reset some attributes
+		self.parent = None
+		self.start_message = None
+
 	def trigger_hooks(self):
 		"""User can register hooks in settings. We trigger them here"""
 
@@ -263,13 +288,20 @@ class AbstractBaseTask(object):
 	def trigger_hook(self, hook):
 		"""Trigger a single hook"""
 		
+
 		# hook is a callable, so call it
 		if hasattr(hook, '__call__'):
 			name = ""
 			try: name = hook.__name__
 			except: name = __hook__.__class__.__name__
-			self.log("Triggering {0} hook: {1}...".format(self.get_task_id(), name))
-			hook()
+			log = "Triggering {0} hook: {1}...".format(self.get_task_id(), name)
+
+			# if hook is subclass of AbstractBaseTask, just run a subtask
+			if isinstance(hook, AbstractBaseTask):
+				self.subtask(hook, start_message=log)
+			else:
+				self.log(log)
+				hook()
 			return 
 
 		# hook is an iterable with the callback first, then arguments
@@ -278,8 +310,13 @@ class AbstractBaseTask(object):
 			name = ""
 			try: name = callback.__name__
 			except: name = callback.__class__.__name__
-			self.log("Triggering {0} hook: {1}...".format(self.get_task_id(), name))
-			callback(*hook[1:])
+			log = "Triggering {0} hook: {1}...".format(self.get_task_id(), name)
+			# if hook is subclass of AbstractBaseTask, just run a subtask
+			if isinstance(callback, AbstractBaseTask):
+				self.subtask(callback, start_message=log, *hook[1:])
+			else:
+				self.log(log)
+				callback(*hook[1:])
 
 
 
@@ -291,7 +328,7 @@ class AbstractBaseTask(object):
 			task_arguments = "\nThe task was launched with the following arguments:\n\n"
 
 			for key, value in self.kwargs.items():
-				task_arguments += "\t- {0} : {1}\n".format(key, value)
+				task_arguments += "   - {0} : {1}\n".format(key, value)
 
 			message += task_arguments
 
@@ -301,9 +338,14 @@ class AbstractBaseTask(object):
 
 		if self.start_message is not None:
 			return self.start_message
-		return None
+		return "Running {0}{1}...".format(self.get_task_id(), self.get_suffix())
 
-	
+	def get_suffix(self):
+		return ''
+
+	def subtask(self, task, *args, **kwargs):
+		"""run a task as a subtask"""
+		return task(*args, parent=self, **kwargs)	
 
 class BaseTask(AbstractBaseTask, Task):
 	"""Subclass of these class will be detected as fabric tasks"""
@@ -328,7 +370,7 @@ class ConfirmTask(object):
 		confirm = strtobool(self.kwargs.pop('confirm', False))
 		if not confirm:
 			# we do not ask for confirmation for subtasks
-			if not self.subtask:
+			if self.parent is None:
 				question = self.confirm_message + self.confirm_choice
 				self.confirmed = console.confirm(question, default=self.default)
 
@@ -341,6 +383,9 @@ class TargetTask(BaseTask):
 	expected_args = [
 		Argument("target", True, "local|remote", lambda v: v, lambda v: v in ['local', 'remote']),
 	]
+
+	def get_suffix(self):
+		return " [on {0}]".format(self.target)
 
 	def setup(self, *args, **kwargs):
 		"""Add a self.target attribute"""
@@ -366,7 +411,7 @@ class TargetTask(BaseTask):
 class RunTarget(AbstractBaseTask):
 	"""Run a unix command on the target"""
 	name = "run_target"
-
+	logging = False
 	def operation(self, target, command, capture=True):
 		if utils.is_local(target):
 			return local(command, capture=capture)
@@ -379,19 +424,17 @@ run_target = RunTarget()
 
 def subtask(task, *args, **kwargs):
 	"""run a task as a subtask"""
-	return task(*args, subtask=True, **kwargs)	
+	return task(*args, parent=True, **kwargs)	
 
 class WP(TargetTask):
 	"""Run a wp-cli command on the target. You don't need to prefix it with 'wp', it will be added automatically"""
 	
 	name = "wp"
-
+	logging = False
 	def setup(self, *args, **kwargs):
 		# do not display output if it is a subtask
-		if kwargs.get('subtask', False) is False:
+		if self.parent is None:
 			kwargs['show'] = ["stdout"]
-		else:
-			kwargs['silent'] = kwargs.get('silent', True)
 		super(WP, self).setup(*args, **kwargs)
 
 	def operation(self, target, command):	
@@ -428,29 +471,29 @@ get_file = GetFile()
 class WPCollectData(TargetTask):
 	"""Return a dict of data (version , languages, plugins, themes) about the targeted wordpress installation"""
 	
-	name="collect_data"
-
+	name = "collect_data"
+	hide = ["everything"]
 	def operation(self, target):
 		data = {}
-		self.log('Collecting data about {0} Wordpress installation...'.format(target))
+		
 
 		# get wordpress version
-		data['version'] = subtask(wp, target, "core version")
+		data['version'] = self.subtask(wp, target, "core version")
 
 		# get wordpress locale
-		json_data = subtask(wp, target, "core language list --format=json")
+		json_data = self.subtask(wp, target, "core language list --format=json")
 		languages = json.loads(json_data)
 		active_languages = [language['language'] for language in languages if language['status'] == "active"]
 		data['locales'] = active_languages
 
 		# get plugins data
-		json_data = subtask(wp, target, "plugin list --format=json")
+		json_data = self.subtask(wp, target, "plugin list --format=json")
 		plugins = json.loads(json_data)
 		active_plugins = [plugin for plugin in plugins if plugin['status'] == "active"]
 		data['plugins'] = active_plugins
 
 		# get themes data
-		json_data = subtask(wp, target, "theme list --format=json")
+		json_data = self.subtask(wp, target, "theme list --format=json")
 		themes = json.loads(json_data)
 		active_themes = [theme for theme in themes if theme['status'] == "active"]
 		data['themes'] = active_themes

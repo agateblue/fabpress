@@ -23,8 +23,8 @@ class WPDrop(base.ConfirmTask, base.TargetTask):
 	name = "drop"
 
 	def operation(self, target):
-		base.subtask(db.reset, target=target)
-		base.subtask(fs.drop, target=target)
+		self.subtask(db.reset, target=target)
+		self.subtask(fs.drop, target=target)
 
 wp_drop = WPDrop()
 
@@ -35,28 +35,28 @@ class WPDownload(base.ConfirmTask, base.TargetTask):
 	def operation(self, target, data=None):
 		origin = utils.reverse(target)
 		if data is None:
-			data = base.subtask(base.collect_data, origin)
+			data = self.subtask(base.collect_data, origin)
 
 		# create directory if needed
-		base.subtask(base.run_target, target, "mkdir -p '{0}'".format(utils.setting('path', target)))
+		self.subtask(base.run_target, target, "mkdir -p '{0}'".format(utils.setting('path', target)))
 		download_command = "core download --locale={0} --path='{1}' --version='{2}'".format(
 			data.get('locales')[0], utils.setting('path', target), data.get('version'))
 
 		# fix permissions
 		self.log('Changing permissions of {0} to {1}'.format(utils.setting('path', target), utils.setting("default_chmod")))
-		base.subtask(base.run_target, target, "chmod {0} -R '{1}'".format(utils.setting("default_chmod"), utils.setting('path', target)))
+		self.subtask(base.run_target, target, "chmod {0} -R '{1}'".format(utils.setting("default_chmod"), utils.setting('path', target)))
 
 		with warn_only():
-			output = base.subtask(base.wp, target, download_command)
+			output = self.subtask(base.wp, target, download_command)
 
 		# install additionnal languages
 		for locale in data.get('locales')[1:]:
-			base.subtask(wp,target, "core language install {0}".format(locale))
+			self.subtask(wp,target, "core language install {0}".format(locale))
 
 		# check if wp-config.php exists:
 		wp_config_path = os.path.join(utils.setting("path", target), "wp-config.php")
 		command = """[ -f '{0}' ] && echo '1' 2>&1 || echo '0' 2>&1""".format(wp_config_path)
-		output = base.subtask(base.run_target, target, command)
+		output = self.subtask(base.run_target, target, command)
 		wp_config_exists = int(output)
 		# "${EDITOR:-vi}"
 		edit_command = "{0} {1}".format("nano", wp_config_path)
@@ -67,7 +67,7 @@ class WPDownload(base.ConfirmTask, base.TargetTask):
 		else:
 			# copy the sample
 			command = "mv '{0}' '{1}'".format(os.path.join(utils.setting("path", target), "wp-config-sample.php"), wp_config_path)
-			base.subtask(base.run_target, target, command)
+			self.subtask(base.run_target, target, command)
 			edit = console.confirm("wp-config.php was copied from sample. Do you want to edit it ?")
 			if edit:
 				# edit the wp-config.php
@@ -83,17 +83,16 @@ class WPMirror(base.ConfirmTask, base.TargetTask):
 		origin = utils.reverse(target)
 
 		# get informations about installation we need to mirror, such as wp version, locale, themes, plugins...
-		data = base.subtask(base.collect_data, origin)
+		data = self.subtask(base.collect_data, origin)
 
 		# download wordpress files
-		base.subtask(download, target, data=data)
+		self.subtask(download, target, data=data)
 
 		# sync
-		base.subtask(sync, target, data=data)
-
-
+		self.subtask(sync, target, data=data)
 
 wp_mirror = WPMirror()
+
 
 class WPPull(SyncMediaTask, base.ConfirmTask, base.BaseTask):
 	"""Sync database, themes, plugins and media files from remote to local installation"""
@@ -101,7 +100,7 @@ class WPPull(SyncMediaTask, base.ConfirmTask, base.BaseTask):
 	name="pull"
 
 	def operation(self, *args, **kwargs):
-		base.subtask(sync, "local", *args, **kwargs)
+		self.subtask(sync, "local", *args, **kwargs)
 
 pull = WPPull()
 
@@ -112,9 +111,10 @@ class WPPush(SyncMediaTask, base.ConfirmTask, base.BaseTask):
 	name="push"
 
 	def operation(self, *args, **kwargs):
-		base.subtask(sync, "remote", *args, **kwargs)
+		self.subtask(sync, "remote", *args, **kwargs)
 
 push = WPPush()
+
 
 class WPSync(SyncMediaTask, base.ConfirmTask, base.TargetTask):
 	"""Pull origin database, themes, plugins and media files to target"""
@@ -125,21 +125,21 @@ class WPSync(SyncMediaTask, base.ConfirmTask, base.TargetTask):
 
 		origin = utils.reverse(target)
 		if data is None:
-			data = base.subtask(base.collect_data, origin)
+			data = self.subtask(base.collect_data, origin)
 
 		# import the database
-		base.subtask(db.sync, target)
+		self.subtask(db.sync, target)
 
 		# download plugins and themes
-		base.subtask(theme.sync, target, data)
-		base.subtask(plugin.sync, target, data)
+		self.subtask(theme.sync, target, data)
+		self.subtask(plugin.sync, target, data)
 
 		if base.strtobool(sync_media):
 			# download media files
-			base.subtask(med.sync, target)
-
+			self.subtask(med.sync, target)
 
 sync = WPSync()
+
 
 class WPHelp(base.BaseTask):
 	"""Get some help"""

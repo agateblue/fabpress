@@ -13,6 +13,10 @@ Then, each time there is a change on production website and you need to pull the
 
 Going through these steps is a nightmare and this is why I wrote fabpress: I wanted a command-line tool that would let me mirror a Wordpress installation via a single command.
 
+In fabpress, this command is: 
+
+    
+
 # What is fabpress ?
 
 - a bunch of scripts, written in Python on top of Fabric and WP-CLI, two awesome tools
@@ -48,7 +52,6 @@ Going through these steps is a nightmare and this is why I wrote fabpress: I wan
 For easier explanation, I will assume you have a production Wordpress instance, at URL `http://site.com`. This website works fine, but you need to replace the current theme with your own theme, named `blast`. You want to develop and test this theme locally, on your computer before deploying it on your production website.
 
 Your themes files are located on your computer at `/home/user/projects/blast`, and you've created a directory for your local Wordpress instance at `/var/www/site.com`.
-
 
 # Configuration
 
