@@ -17,8 +17,8 @@ class WPThemeSync(base.TargetTask):
 
         for theme in data['themes']:
 
-            if theme.get('name') in utils.setting('skip_themes'):
-                self.info("Skipping theme {0}: it is listed in skip_themes".format(theme.get('name')))
+            if theme.get('name') in utils.setting('ignored_themes'):
+                self.info("Skipping theme {0}: it is listed in ignored_themes".format(theme.get('name')))
             else:
                 self.info('Installing theme {0} ({1})...'.format(theme.get("name"), theme.get('version')))
                 command = "theme install {0} --activate --version={1}".format(theme.get("name"), theme.get('version'))

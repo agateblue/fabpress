@@ -16,8 +16,8 @@ class WPPluginSync(base.TargetTask):
 			data = self.subtask(base.collect_data, origin)
 
 		for plugin in data['plugins']:
-			if plugin in utils.setting('skip_plugins'):
-				self.info("Skipping plugin {0}; it is listed in skip_themes".format(plugin))
+			if plugin in utils.setting('ignored_plugins'):
+				self.info("Skipping plugin {0}; it is listed in ignored_themes".format(plugin))
 			else:
 				self.info('Installing plugin {0} ({1})...'.format(plugin.get("name"), plugin.get('version')))
 				command = "plugin install {0} --activate --version={1}".format(plugin.get("name"), plugin.get('version'))

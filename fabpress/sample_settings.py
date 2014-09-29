@@ -59,23 +59,23 @@ local = {
 # Useful if you are developping your own theme and do not want 
 # fabpress trying to download this one from wordpress.org
 
-# skip_themes = ['theme_name']
-skip_themes = []
+# ignored_themes = ['theme_name']
+ignored_themes = []
 
 # A list of plugin names you want to skip when syncing plugins
 # Useful if you are developping your own plugin and do not want 
 # fabpress trying to download this one from wordpress.org
 
-# skip_plugins = ['plugin_name']
-skip_plugins = []
+# ignored_plugins = ['plugin_name']
+ignored_plugins = []
 
 
 # Do not touch this
 fabpress_settings = {
     "remote": remote,
     "local": local,    
-    "skip_plugins": skip_plugins,
-    "skip_themes": skip_themes,
+    "ignored_plugins": skip_plugins,
+    "ignored_themes": skip_themes,
 }
 
 # Do not touch this either
