@@ -16,7 +16,6 @@ class WPThemeSync(base.TargetTask):
             data = self.subtask(base.collect_data, origin)
 
         for theme in data['themes']:
-
             if theme.get('name') in utils.setting('ignored_themes'):
                 self.info("Skipping theme {0}: it is listed in ignored_themes".format(theme.get('name')))
             else:

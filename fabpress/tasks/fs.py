@@ -7,13 +7,13 @@ from fabpress import utils
 from fabric.api import hide, warn_only
 
 class WPFilesDrop(base.ConfirmTask, base.TargetTask):
-	"""Remove all files of target, including target directory"""
+    """Remove all files of target, including target directory"""
 
-	name = "drop"
+    name = "drop"
 
-	def operation(self, target):
-		command = 'find {0}/ -name "*" | xargs rm -rf '.format(os.path.join(utils.setting("path", target)))
-		self.subtask(base.run_target, target=target, command=command)
+    def operation(self, target):
+        command = 'find {0}/ -name "*" | xargs rm -rf '.format(os.path.join(utils.setting("path", target)))
+        self.subtask(base.run_target, target=target, command=command)
 
 drop = WPFilesDrop()
 
@@ -34,10 +34,10 @@ class WPSymlink(base.AbstractBaseTask):
 
 
 class WPPluginSymlink(WPSymlink):
-	symlink_directory="wp-content/plugins"
+    symlink_directory="wp-content/plugins"
 
 class WPThemeSymlink(WPSymlink):
-	symlink_directory="wp-content/themes"
+    symlink_directory="wp-content/themes"
 
 
 plugin_symlink = WPPluginSymlink()

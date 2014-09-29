@@ -74,8 +74,8 @@ ignored_plugins = []
 fabpress_settings = {
     "remote": remote,
     "local": local,    
-    "ignored_plugins": skip_plugins,
-    "ignored_themes": skip_themes,
+    "ignored_plugins": ignored_plugins,
+    "ignored_themes": ignored_themes,
 }
 
 # Do not touch this either

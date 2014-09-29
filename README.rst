@@ -6,7 +6,7 @@ If you want to developp locally with Wordpress, you usually have to follow these
 
 - install a local copy of Wordpress
 - import your production MySQL database
-- search and replace permalinks in database (``http://mysite.com`` to ``localhost/dev/mysite``)
+- search and replace permalinks in database (``http://mysite.com`` to ``http://localhost/dev/mysite``)
 - install all your plugins and themes with correct versions
 - download media files
 
@@ -18,7 +18,7 @@ Going through these steps is a nightmare and this is why I wrote fabpress: I wan
 What is fabpress ?
 ==================
 
-- a bunch of scripts, written in Python on top of Fabric and WP-CLI, two awesome tools
+- a bunch of scripts, written in Python on top of Fabric_ and WP-CLI_, two awesome tools
 - a way to pull/push database, media files, themes, plugins from/to your production wordpress website
 - a command-line tool, tested on ArchLinux and Debian, that could probably work on Mac OS and other Linux distributions
 - free (as in free speech and free beer), open-source, licensed under BSD
@@ -38,7 +38,6 @@ On local machine
 
 - Python 2.7
 - Fabric_ for managing connexion to server and calling commands
-- WP-CLI_ for dealing with most of the Wordpress stuff
 
 On remote machine
 *****************
@@ -51,21 +50,15 @@ On both
 - WP-CLI_ for dealing with most of the Wordpress stuff
 - A Linux system (fabpress was developped and tested on Archlinux and Debian Wheezy)
 
-Use case
-========
-
-For easier explanation, I will assume you have a production Wordpress instance, at URL ``http://site.com``. This website works fine, but you need to replace the current theme with your own theme, named ``blast``. You want to develop and test this theme locally, on your computer before deploying it on your production website.
-
-Your themes files are located on your computer at ``/home/user/projects/blast``, and you've created a directory for your local Wordpress instance at ``/var/www/site.com``.
 
 Configuration
 =============
 
 First, move into your project directory::
 
-    cd /home/user/projects/blast
+    cd /home/user/projects/mysite
 
-Create a ``fabfile.py`` file in your project directory::
+Create a ``fabfile.py`` file::
 
     echo 'from fabpress import tasks as fp' >> /home/user/projects/blast/fabfile.py
 
@@ -119,6 +112,57 @@ Note that fabpress help and documentation sometimes mentions ``origin``. This te
 
 If you run ``fab.main.sync:remote``, ``origin`` designate your local Wordpress instance.
 
+Example workflow
+================
+
+First, we move to our project directory::
+
+    cd /home/user/projects/mysite
+
+Let's mirror the production website, so we can use it locally::
+
+    fab fp.main.mirror:local
+
+    # typical output
+
+    This is an important choice. Do you want to continue ? [y/N] y
+    Running main.mirror [on local]...
+        Running base.collect_data [on remote]...
+        Running main.download [on local]...
+            Changing permissions of /var/www/mysite to 770
+            wp-config.php was copied from sample. Do you want to edit it ? [Y/n] y
+            Edit your file located at /var/www/mysite/wp-config.php then relaunch this command
+
+    fab fp.main.mirror:local
+    This is an important choice. Do you want to continue ? [y/N] y
+
+    Existing wp-config.php file found
+        Running main.sync [on local]...
+            Syncing databases (from remote to local)
+                Running db.export [on remote]...
+                Running db.import [on local]...
+                    Creating a safety backup of local database, juste in case
+                    Downloading backup from remote
+                    Importing backup.sql into local database...
+                    Deleting useless SQL backups...
+            Running db.fix_permalinks [on local]...
+                Updating URL(s) from mysite.com to localhost/mysite...
+            Running theme.sync [on local]...
+                Skipping theme blast: it is listed in ignored_themes
+            Running plugin.sync [on local]...
+                Running media.sync [on local]...
+            Syncing media files from remote to local (please, be patient, this may take some time)
+    Done.
+
+
+You can now open ``http://localhost/mysite`` with your web browser, and browse the local instance of your production website.
+If you encounter 404 errors, login at ``http://localhost/mysite/wp-admin`` and update your permalinks (Settings > Permalinks). You should not have to do it again after that.
+
+Then, it's time to work. You can install themes, plugins, create new pages and posts, import media files.
+
+When you're done and want to push your local changes in production, just run::
+
+    fab fp.main.push
 
 Available tasks
 ===============
@@ -150,8 +194,8 @@ Output from ``fab -l``::
 Limitations
 ===========
 
-- for some reasons, when mirroring a Wordpress installation for the first time, you'll have to manually save the permalinks from the admin, in order to load Custom Posts Types permalinks. Else, accessing a CPT detail page would raise a 404.
-- Will only download Themes and Plugins available on wordpress.org
+- For some reasons, when mirroring a Wordpress installation for the first time, you'll have to manually save the permalinks from the admin, in order to load Custom Posts Types permalinks. Else, accessing a CPT detail page would raise a 404.
+- Will only download Themes and Plugins that are available on wordpress.org.
 
 Contribute
 ==========
@@ -162,9 +206,6 @@ License
 =======
 
 The project is licensed under BSD licence.
-
-Links
-=====
 
 .. _Fabric: http://docs.fabfile.org
 .. _WP-CLI: http://wp-cli.org/
