@@ -8,3 +8,5 @@ fab_settings.py
 
 tests.py
 *.phar
+dist
+*.egg-info
