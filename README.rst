@@ -6,7 +6,7 @@ If you want to developp locally with Wordpress, you usually have to follow these
 
 - install a local copy of Wordpress
 - import your production MySQL database
-- search and replace permalinks in database (`http://mysite.com` to `localhost/dev/mysite`)
+- search and replace permalinks in database (``http://mysite.com`` to ``localhost/dev/mysite``)
 - install all your plugins and themes with correct versions
 - download media files
 
@@ -54,9 +54,9 @@ On both
 Use case
 ========
 
-For easier explanation, I will assume you have a production Wordpress instance, at URL `http://site.com`. This website works fine, but you need to replace the current theme with your own theme, named `blast`. You want to develop and test this theme locally, on your computer before deploying it on your production website.
+For easier explanation, I will assume you have a production Wordpress instance, at URL ``http://site.com``. This website works fine, but you need to replace the current theme with your own theme, named ``blast``. You want to develop and test this theme locally, on your computer before deploying it on your production website.
 
-Your themes files are located on your computer at `/home/user/projects/blast`, and you've created a directory for your local Wordpress instance at `/var/www/site.com`.
+Your themes files are located on your computer at ``/home/user/projects/blast``, and you've created a directory for your local Wordpress instance at ``/var/www/site.com``.
 
 Configuration
 =============
@@ -65,7 +65,7 @@ First, move into your project directory::
 
     cd /home/user/projects/blast
 
-Create a file `fabfile.py` in your project directory::
+Create a ``fabfile.py`` file in your project directory::
 
     echo 'from fabpress import tasks as fp' >> /home/user/projects/blast/fabfile.py
 
@@ -73,11 +73,15 @@ Then, generate a config file::
     
     fab fp.config.create
 
-This will create a `fab_settings.py` file in your project directory. Fell free to add it to your VCS ignored files.
+This will create a ``fab_settings.py`` file in your project directory. Fell free to add it to your VCS ignored files.
 
 You can now edit the file (it is heavily commented)::
 
     nano fab_settings.py
+
+Import your settings in your ``fabfile.py``::
+    
+    echo "import fab_settings" >> fabfile.py
 
 After that, well, you're almost good to go.
 
@@ -97,7 +101,7 @@ A task is an action you can run from command line, using the following notation:
     # Some tasks just don't need arguments
     fab command
 
-You can list available commands via `fab -l` and get additionnal informations about a fabpress task, with `fab fp.<command_name>:help`.
+You can list available commands via ``fab -l`` and get additionnal informations about a fabpress task, with ``fab fp.<command_name>:help``.
 
 Targets
 *******
@@ -109,17 +113,17 @@ In fabpress, many tasks can be run independantly on remote or local Wordpress in
 
 The first one will create a backup of your remote database, download it and import it into your local wordpress instance. The second one will do the opposite: backup your local database, upload it and import it into your remote instance.
 
-When a task require a target argument, which value can be either `remote` or `local`, it usually means data (database, media files, plugins, themes...) will be imported INTO your target wordpress instance. Some tasks do not import data, but still require a target: `fab fp.db.reset:<target>` will reset all database tables of targeted installation. 
+When a task require a target argument, which value can be either ``remote`` or ``local``, it usually means data (database, media files, plugins, themes...) will be imported INTO your target wordpress instance. Some tasks do not import data, but still require a target: ``fab fp.db.reset:<target>`` will reset all database tables of targeted installation. 
 
-Note that fabpress help and documentation sometimes mentions `origin`. This term is a shortcut for designating the opposite of a target. With the following command `fab.main.sync:local` your target is `local`, and `origin` is your remote installation, from where data will be imported. 
+Note that fabpress help and documentation sometimes mentions ``origin``. This term is a shortcut for designating the opposite of a target. With the following command ``fab.main.sync:local`` your target is ``local``, and ``origin`` is your remote installation, from where data will be imported. 
 
-If you run `fab.main.sync:remote`, `origin` designate your local Wordpress instance.
+If you run ``fab.main.sync:remote``, ``origin`` designate your local Wordpress instance.
 
 
 Available tasks
 ===============
 
-Output from `fab -l`::
+Output from ``fab -l``::
     
     fp.config.create         Create a config file from fabpress sample
     fp.db.clear_backups      Remove backup files on target
