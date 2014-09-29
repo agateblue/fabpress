@@ -18,16 +18,16 @@ Going through these steps is a nightmare and this is why I wrote fabpress: I wan
 What is fabpress ?
 ==================
 
-- a bunch of scripts, written in Python on top of `Fabric <http://www.fabfile.org/installing.html>`_ and WP-CLI_, two awesome tools
+- a bunch of scripts, written in Python on top of `Fabric <http://www.fabfile.org/>`_ and WP-CLI_, two awesome tools
 - a way to pull/push database, media files, themes, plugins from/to your production wordpress website
 - a command-line tool, tested on ArchLinux and Debian, that could probably work on Mac OS and other Linux distributions
 - free (as in free speech and free beer), open-source, licensed under BSD
 
 
-What is NOT fabpress ?
+What is *not* fabpress ?
 ======================
 
-- production-ready. I use it on my projects, and it works. There is absolutely no warranty it will work for you, with your setup. Before trying it, please, create backups of your data. I mean it, seriously.
+- production-ready. I use it on my projects, and it works. There is absolutely no warranty it will work for you, with your setup. **Before trying it, please, backup your data**. I mean it, seriously.
 
 
 Requirements
@@ -37,7 +37,7 @@ On local machine
 ****************
 
 - Python 2.7
-- `Fabric <http://www.fabfile.org/installing.html>`_ for managing connexion to server and calling commands
+- `Fabric <http://www.fabfile.org/>`_ for managing connexion to server and calling commands
 
 On remote machine
 *****************
