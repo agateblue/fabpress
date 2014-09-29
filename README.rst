@@ -175,7 +175,7 @@ Let's mirror the production website, so we can use it locally::
     Done.
 
 
-We can now open ``http://localhost/mysite`` with any web browser, and browse the local instance of our production website.
+We can now open ``http://localhost/mysite`` with any web browser, and browse the local copy of our production website.
 If you encounter 404 errors, login at ``http://localhost/mysite/wp-admin`` and update your permalinks (Settings > Permalinks). You should not have to do it again after that.
 
 Then, it's time to work. We install themes, plugins, create new pages and posts, import media files...
@@ -244,6 +244,14 @@ Limitations
 
 - For some reasons, when mirroring a Wordpress installation for the first time, you'll have to manually save the permalinks from the admin, in order to load Custom Posts Types permalinks. Else, accessing a CPT detail page would raise a 404.
 - Will only download Themes and Plugins that are available on wordpress.org.
+
+
+Changes
+=======
+
+0.1 - 29/09/2014:
+*****************
+- initial release
 
 Contribute
 ==========
