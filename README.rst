@@ -18,7 +18,7 @@ Going through these steps is a nightmare and this is why I wrote fabpress: I wan
 What is fabpress ?
 ==================
 
-- a bunch of scripts, written in Python on top of Fabric_ and WP-CLI_, two awesome tools
+- a bunch of scripts, written in Python on top of `Fabric`_ and `WP-CLI`_, two awesome tools
 - a way to pull/push database, media files, themes, plugins from/to your production wordpress website
 - a command-line tool, tested on ArchLinux and Debian, that could probably work on Mac OS and other Linux distributions
 - free (as in free speech and free beer), open-source, licensed under BSD
@@ -64,7 +64,7 @@ Install `fabric <http://www.fabfile.org/installing.html>`_ your local machine::
 WP-CLI
 ******
 
-Follow the procedure detailed on `WP-CLI website<http://wp-cli.org/>`_.
+Follow the procedure detailed on WP-CLI_ website.
 
 Fabpress
 ********
