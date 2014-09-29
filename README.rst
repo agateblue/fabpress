@@ -15,7 +15,7 @@ Going through these steps by hand is a nightmare and this is why I wrote fabpres
 What is fabpress ?
 ==================
 
-- a bunch of scripts, written in Python on top of `Fabric <http://www.fabfile.org/>`_ and WP-CLI_, two awesome tools
+- a bunch of scripts, written in Python on top of `Fabric <http://www.fabfile.org/>`_ and `WP-CLI <http://wp-cli.org/>`_, two awesome tools
 - a way to pull/push database, media files, themes, plugins from/to your production wordpress website
 - a command-line tool, tested on ArchLinux and Debian, that could probably work on Mac OS and other Linux distributions
 - free (as in free speech and free beer), open-source, licensed under BSD
@@ -42,7 +42,7 @@ On remote machine
 On both
 *******
 
-- WP-CLI_ for dealing with most of the Wordpress stuff
+- `WP-CLI <http://wp-cli.org/>`_ for dealing with most of the Wordpress stuff
 - A Linux system (fabpress was developped and tested on Archlinux and Debian Wheezy)
 
 Installation
@@ -60,12 +60,12 @@ Install `fabric <http://www.fabfile.org/installing.html>`_ your local machine::
 WP-CLI
 ******
 
-Follow the procedure detailed on WP-CLI_ website, on your local and production machines.
+Follow the procedure detailed on `WP-CLI <http://wp-cli.org/>`_website, on your local and production machines.
 
 Fabpress
 ********
 
-Fabpress is available via ``pip``. Install it on your local machine::
+Fabpress is available on `PyPi <https://pypi.python.org/pypi/fabpress>_. Install it on your local machine::
 
     pip install fabpress --user
 
@@ -80,7 +80,7 @@ First, move into your project directory::
 
 Create a ``fabfile.py`` file::
 
-    echo 'from fabpress import tasks as fp' >> /home/user/projects/blast/fabfile.py
+    echo 'from fabpress import tasks as fp' >> fabfile.py
 
 Then, generate a config file::
     
@@ -94,9 +94,9 @@ You can now edit the file (it is heavily commented)::
 
 Import your settings in your ``fabfile.py``::
     
-    echo "import fab_settings" >> fabfile.py
+    echo "import fab_settings" >> fabfile.py    
 
-After that, well, you're almost good to go.
+After that, well, you're almost good to go. Remember to create a MySQL database for your local instance.
 
 A bit of theory
 ===============
@@ -262,6 +262,3 @@ License
 =======
 
 The project is licensed under BSD licence.
-
-.. _Fabric: http://docs.fabfile.org
-.. _WP-CLI: http://wp-cli.org/
