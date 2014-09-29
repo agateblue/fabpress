@@ -5,10 +5,10 @@ from fabpress.utils import load_config
 from fabric.api import env
 
 # Domain or ip of your production server, where you will log via SSH
-# You can append the SSH port it your SSh server run on a non standard port:
+# You can append the SSH port it your SSH server run on a non standard port:
 # env.hosts = ['mydomain.com:800']
 
-env.hosts = ['mydomain.com']
+env.hosts = ['mysite.com']
 
 # The account that will be used to log on host via SSH
 env.user = 'eliotberriot'
@@ -18,7 +18,7 @@ remote = {
     # path to your remote wordpress directory (where wp-config.php is stored)
     "path": "/path/to/your/wordpress/install", 
 
-    # Path where database dumps will be stored
+    # Path where database dumps will be stored. Please, ensure this path is not served by your webserver.
     "dumps_path": "/path/to/db/dumps",
 
     # The url of your remote Wordpress instance
