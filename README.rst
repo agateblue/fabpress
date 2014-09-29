@@ -1,6 +1,4 @@
-
-Why ?
-=====
+Note: fabpress is in alpha stade, use with caution
 
 If you want to developp locally with Wordpress, you usually have to follow these steps: 
 
@@ -12,8 +10,7 @@ If you want to developp locally with Wordpress, you usually have to follow these
 
 Then, each time there is a change on production website and you need to pull these changes, you have to go through the same steps. And the same thing happens if you want to deploy your local website in production.
 
-Going through these steps is a nightmare and this is why I wrote fabpress: I wanted a command-line tool that would let me mirror a Wordpress installation via a single command.
-
+Going through these steps by hand is a nightmare and this is why I wrote fabpress: I wanted a command-line tool that would let me mirror a Wordpress installation via a single command.
 
 What is fabpress ?
 ==================
@@ -51,6 +48,8 @@ On both
 Installation
 ============
 
+Recommanded installation procedure requires `pip <http://pip.readthedocs.org/en/latest/installing.html>`_, but you can also use ``easy_install``. Please install pip before continuing.
+
 Fabric
 ******
 
@@ -61,12 +60,12 @@ Install `fabric <http://www.fabfile.org/installing.html>`_ your local machine::
 WP-CLI
 ******
 
-Follow the procedure detailed on WP-CLI_ website.
+Follow the procedure detailed on WP-CLI_ website, on your local and production machines.
 
 Fabpress
 ********
 
-Fabpress is available via ``pip``::
+Fabpress is available via ``pip``. Install it on your local machine::
 
     pip install fabpress --user
 
