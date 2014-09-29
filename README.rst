@@ -51,6 +51,30 @@ On both
 - A Linux system (fabpress was developped and tested on Archlinux and Debian Wheezy)
 
 
+Installation
+============
+
+Fabric
+******
+
+Install `fabric <http://www.fabfile.org/installing.html>`_ your local machine::
+
+    sudo pip install fabric
+
+WP-CLI
+******
+
+Follow the procedure detailed on `WP-CLI website<http://wp-cli.org/>`_.
+
+Fabpress
+********
+
+Fabpress is available via ``pip``::
+
+    pip install fabpress --user
+
+This method will also download and install Fabric    
+
 Configuration
 =============
 
@@ -155,14 +179,46 @@ Let's mirror the production website, so we can use it locally::
     Done.
 
 
-You can now open ``http://localhost/mysite`` with your web browser, and browse the local instance of your production website.
+We can now open ``http://localhost/mysite`` with any web browser, and browse the local instance of our production website.
 If you encounter 404 errors, login at ``http://localhost/mysite/wp-admin`` and update your permalinks (Settings > Permalinks). You should not have to do it again after that.
 
-Then, it's time to work. You can install themes, plugins, create new pages and posts, import media files.
+Then, it's time to work. We install themes, plugins, create new pages and posts, import media files...
 
-When you're done and want to push your local changes in production, just run::
+When we're done and want to push your local changes in production, we just run::
 
     fab fp.main.push
+
+Later, if we want to import changes from production::
+
+    fab fp.main.pull
+
+
+Hooks
+=====
+
+Sometimes, you want to do something when a task is run. For example, pulling from your theme's Git repository when you run ``fp.theme.sync`` on your remote installation. Hooks are here for that::
+
+    # hooks.py (create this in the same directory as your fab_settings.py)
+
+    from fabric.api import run, cd
+    def pull_theme():
+        with cd("/var/www/mysite/wp-content/themes/mytheme"):
+            run("git pull")
+
+
+    # fab_settings.py
+
+    import hooks
+
+    remote = {
+
+        # ...
+
+        "hooks": {
+            "theme.sync": hooks.pull_theme
+        },
+    }
+
 
 Available tasks
 ===============
@@ -188,7 +244,6 @@ Output from ``fab -l``::
     fp.media.sync            Download origin media files to target
     fp.plugin.sync           Download and activate origin plugins on target
     fp.theme.sync            Download and activate origin themes on target
-
 
 
 Limitations

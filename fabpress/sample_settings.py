@@ -70,12 +70,17 @@ ignored_themes = []
 ignored_plugins = []
 
 
+# hooks that will be triggered every time, no matters the target
+hooks = {}
+
+
 # Do not touch this
 fabpress_settings = {
     "remote": remote,
     "local": local,    
     "ignored_plugins": ignored_plugins,
     "ignored_themes": ignored_themes,
+    "hooks": hooks
 }
 
 # Do not touch this either
