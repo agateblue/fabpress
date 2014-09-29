@@ -437,13 +437,17 @@ class WP(TargetTask):
 
 	def operation(self, target, command):	
 		"""run a wpcli command on local or remote"""
+		
+		# get wp-cli path on target
+		wp = utils.setting('wp-cli', target, 'wp')
+		full_command = "{0} {1}".format(wp, command)
 		if utils.is_local(target):
-			with lcd(utils.setting("path", "local")):
-				r = local("wp {0}".format(command), capture=True)
+			with lcd(utils.setting("path", target)):
+				r = local(full_command, capture=True)
 
 		if utils.is_remote(target):
-			with cd(utils.setting("path", "remote")):
-				r = run("wp {0}".format(command))
+			with cd(utils.setting("path", target)):
+				r = run(full_command)
 
 		if self.called_via_fab:
 			self.log(r)

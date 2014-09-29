@@ -75,7 +75,7 @@ Then, generate a config file::
 
 This will create a `fab_settings.py` file in your project directory. Fell free to add it to your VCS ignored files.
 
-After that, you can edit the file (it is heavily commented)::
+You can now edit the file (it is heavily commented)::
 
     nano fab_settings.py
 

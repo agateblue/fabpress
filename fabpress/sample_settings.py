@@ -28,7 +28,10 @@ remote = {
     # Please refer to documentation for in-depth explanation
     "hooks": {
         # your hooks here
-    }
+    },
+
+    # the path to your remote wp-cli executable. Ensure you have permission to execute it
+    "wp-cli": "wp"
 }
 
 # Same as remote, but for your local (development) Wordpress instance
@@ -46,7 +49,10 @@ local = {
     # Please refer to documentation for in-depth explanation
     "hooks": {
         # your hooks here
-    }
+    },
+
+    # the path to your remote wp-cli executable. Ensure you have permission to execute it
+    "wp-cli": "wp"
 }
 
 # A list of theme names you want to skip when syncing themes
