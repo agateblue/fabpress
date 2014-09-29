@@ -1,4 +1,4 @@
-Note: fabpress is in alpha stade, use with caution
+Note: fabpress is in early development, use with caution
 
 If you want to developp locally with Wordpress, you usually have to follow these steps: 
 
