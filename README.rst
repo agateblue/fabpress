@@ -23,12 +23,10 @@ What is fabpress ?
 - a command-line tool, tested on ArchLinux and Debian, that could probably work on Mac OS and other Linux distributions
 - free (as in free speech and free beer), open-source, licensed under BSD
 
-
 What is *not* fabpress ?
 ======================
 
 - production-ready. I use it on my projects, and it works. There is absolutely no warranty it will work for you, with your setup. **Before trying it, please, backup your data**. I mean it, seriously.
-
 
 Requirements
 ============
@@ -49,7 +47,6 @@ On both
 
 - WP-CLI_ for dealing with most of the Wordpress stuff
 - A Linux system (fabpress was developped and tested on Archlinux and Debian Wheezy)
-
 
 Installation
 ============
@@ -192,7 +189,6 @@ Later, if we want to import changes from production::
 
     fab fp.main.pull
 
-
 Hooks
 =====
 
@@ -219,7 +215,6 @@ Sometimes, you want to do something when a task is run. For example, pulling fro
         },
     }
 
-
 Available tasks
 ===============
 
@@ -244,7 +239,6 @@ Output from ``fab -l``::
     fp.media.sync            Download origin media files to target
     fp.plugin.sync           Download and activate origin plugins on target
     fp.theme.sync            Download and activate origin themes on target
-
 
 Limitations
 ===========
