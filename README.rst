@@ -21,7 +21,7 @@ What is fabpress ?
 - free (as in free speech and free beer), open-source, licensed under BSD
 
 What is *not* fabpress ?
-======================
+========================
 
 - production-ready. I use it on my projects, and it works. There is absolutely no warranty it will work for you, with your setup. **Before trying it, please, backup your data**. I mean it, seriously.
 
@@ -32,7 +32,7 @@ On local machine
 ****************
 
 - Python 2.7
-- `Fabric <http://www.fabfile.org/>`_ for managing connexion to server and calling commands
+- Fabric for managing connexion to server and calling commands
 
 On remote machine
 *****************
@@ -53,19 +53,19 @@ Recommanded installation procedure requires `pip <http://pip.readthedocs.org/en/
 Fabric
 ******
 
-Install `fabric <http://www.fabfile.org/installing.html>`_ your local machine::
+Install Fabric your local machine::
 
     sudo pip install fabric
 
 WP-CLI
 ******
 
-Follow the procedure detailed on `WP-CLI <http://wp-cli.org/>`_website, on your local and production machines.
+Follow the procedure detailed on `WP-CLI <http://wp-cli.org/>`_ website, on your local and production machines.
 
 Fabpress
 ********
 
-Fabpress is available on `PyPi <https://pypi.python.org/pypi/fabpress>_. Install it on your local machine::
+Fabpress is available on `PyPi <https://pypi.python.org/pypi/fabpress>`_. Install it on your local machine::
 
     pip install fabpress --user
 
@@ -246,8 +246,18 @@ Limitations
 - Will only download Themes and Plugins that are available on wordpress.org.
 
 
+To-do list
+==========
+
+- sync wordpress versions
+- add support for more than two targets
+
 Changes
 =======
+
+0.1.1 - 29/10/2014:
+*****************
+- Syncing DB now clear transients, which should fix some URL issues with plugins (such as Polylang)
 
 0.1 - 29/09/2014:
 *****************

@@ -27,6 +27,10 @@ class WPDBSync(base.ConfirmTask, base.TargetTask):
         # update permalinks
         self.subtask(permalink_fix, target=target)
 
+        # clear transients
+        self.log("Clearing transients...".format(utils.setting("permalinks")))
+        self.subtask(base.wp, target=target, command="transient delete-all")
+
 sync = WPDBSync()
 
 
@@ -72,6 +76,7 @@ class WPDBImport(base.ConfirmTask, base.TargetTask):
         self.log("Importing {0} into {1} database...".format(target_dump_path, target))
         self.subtask(base.wp,target=target, command="db import '{0}'".format(target_dump_path))
 
+
         # remove the backup file locally and remotely
         self.log("Deleting useless SQL backups...", indentation=1)
         self.subtask(base.run_target, utils.reverse(target), "rm '{0}'".format(path))
@@ -113,6 +118,8 @@ class WPPermalinkFix(base.TargetTask):
         self.log("Updating permalinks structure to {0}...".format(utils.setting("permalinks")))
         self.subtask(base.wp, target=target, command="rewrite flush --hard")
         self.subtask(base.wp, target=target, command="rewrite structure '{0}'".format(utils.setting("permalinks")))
+
+        
 
 
 permalink_fix = WPPermalinkFix()
